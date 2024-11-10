@@ -1,9 +1,9 @@
 
 .data
 
-	array: 
-	.align 2
-	.space 40
+	array: #Os indíces são percorridos de acordo com o tamanho do dado utilizado.
+	.align 2 # Alinha a palavra de dados na posição correta
+	.space 40 # Cada inteiro ocupa 4 bytes, o .space aloca 40 bytes, ou seja 10 elementos inteiros. 
 	spc: .asciiz "|"
 	texto: .asciiz "Roberto"
 	nl: .asciiz "\n"
@@ -11,80 +11,85 @@
 	depois: .asciiz "Array depois do sorting: "
 .text
 	
-	move $t0, $zero
-	li $t2, 40
+	move $t0, $zero #Atribui 0 ao reg. $t0
+	li $t2, 40 #Atribui 40 ao reg. $t2
 	
 	loop:
-	beq $t0, $t2, endl
+	beq $t0, $t2, endl #Verifica se o reg. $t0 é igual ao reg. $t2, e se for pula para a linha 32 em que está o endl
 	
-	li $v0, 42
-	la $a0, 0
-	la $a1, 255
+	li $v0, 42 # 42 Representa o syscall para geração de números pseudoaleatórios com limite superior
+	la $a0, 0 # $a0 vai receber o número "aleatório"
+	la $a1, 255 # Limite Superior
 	syscall
 	
-	sw $a0, array($t0)
+	sw $a0, array($t0) # Operação StoreWord, que armazena o valor contido em $a0 em uma array na posição definida por $t0
 	
-	addi $t0, $t0, 4
+	addi $t0, $t0, 4 # $t0 = $t0 + 4, pois um número inteiro ocupa um total de 4 bytes.
 	
-	j loop
+	j loop # O j loop realiza um pulo "jump" para o label "loop"
 	
 	endl:
 		
-		li $v0, 4
-		la $a0, antes
+		li $v0, 4 # Quando 4 é atribuido ao $v0, o syscall vai printar uma string que está armazena no $a0
+		la $a0, antes #Atribuindo a string contida em "antes" ao $a0
 		syscall
-		
+		# Aqui exibe-se a array antes do sorting
 		move $t0, $zero
 		imprime:
-			beq $t0, $t2, preorder
-			li $v0, 1
-			lw $a0, array($t0)
+			beq $t0, $t2, preorder # Verifica se $t0 é igual ao $t2, e caso seja, envia o programa para a linha 53 em que o preorder está localizado
+			li $v0, 1 # Quando 1 é atribuido ao $v0, o syscall vai printar um número inteiro
+			lw $a0, array($t0) # Operação LoadWord, que armazena o valor contido na array na posição $t0 na variável $a0 
 			syscall
 			
-			li $v0, 4
+			li $v0, 4 # Printar uma string
 			la $a0, spc
 			syscall
 			
 			
-			addi $t0, $t0, 4
+			addi $t0, $t0, 4 #Soma 4 ao $t0
 			j imprime
 	
 	preorder:
-	li $t0, 1
+	li $t0, 1 # $t0 começa em 1
 	ordenacao:
-		bgt $t0, 10, fim
+		bgt $t0, 10, fim # Verifica se o $t0 é maior que 10, que é o total de elementos da array e se for pula para o label "fim"
 		
 		li $t1, 0
-		li $t2, 0
-		li $t3, 4
+		li $t2, 0 # Aqui é estabelecida a posição atual
+		li $t3, 4 # Próxima posição
+		
+		# O while vai determinar se 
 		
 		while:
-			bgt $t1, 8, inc
+			bgt $t1, 8, inc #Verifica se 
 			
-			lw $s0, array($t2)
+			# São atribuidos para registradores $s0 e $s1 o conteudo da array nas posições $t2 e $t3
+			
+			lw $s0, array($t2) 
 			lw $s1, array($t3)
 			
-			bgt $s0, $s1, troca
+			bgt $s0, $s1, troca #Se o valor contido em $s0 for maior que o valor de $s1, pula-se para o label "troca"
 			
 			next:
-				addi $t1, $t1, 1
+				addi $t1, $t1, 1 # Conta as iterações no loop interno
+				#Soma-se 4 à $t2 e $t3 para que possam ser acessadas as próximas posições na array
 				addi $t2, $t2, 4
 				addi $t3, $t3, 4
-			
+				
 				j while
 		
 		troca:
+			# Aqui troca-se o conteúdo das posições verificadas anteriormente
 			sw $s0, array($t3)
 			sw $s1, array($t2)
 			j next
 			
 		inc:
-			addi $t0, $t0, 1
-			
+			addi $t0, $t0, 1 # Conta as iterações no loop externo
 			j ordenacao
 	fim:
 		
-		li $v0, 4
+		li $v0, 4 #Printa uma string
 		la $a0, nl
 		syscall
 		
@@ -92,6 +97,7 @@
 		la $a0, depois
 		syscall
 		
+		#Abaixo é exibido a array após o sorting, seguindo o método explicado anteriormente
 		li $t2, 40
 		move $t0, $zero
 		pos:
@@ -108,3 +114,6 @@
 			addi $t0, $t0, 4
 			j pos
 		acabou:
+		
+		li $v0, 10
+		syscall
